@@ -12,19 +12,25 @@ from torch.autograd import Variable
 
 
 def main():
-    data_dir, save_dir, arch, learning_rate, epochs, gpu = get_input_args()
+    data_dir, save_dir, arch, learning_rate, hidden_units, epochs, gpu = get_input_args()
     
     trainloader = load_data.get_trainloader(data_dir)
     validationloader = load_data.get_validationloader(data_dir)
 
-    model = model_factory.get_model(arch)
-    
+    model = model_factory.get_model(arch, hidden_units)
     criterion = nn.NLLLoss()
     optimizer = optim.Adam(model.classifier.parameters(), learning_rate)
 
     train(model, trainloader, validationloader, optimizer, criterion, epochs, gpu)
 
-    model_factory.save_trained_model(model, arch, load_data.get_train_class_to_idx(data_dir), save_dir)
+    model_factory.save_trained_model(
+        model, 
+        arch, 
+        load_data.get_train_class_to_idx(data_dir), 
+        hidden_units,
+        epochs,
+        learning_rate,
+        save_dir)
 
 
 def get_input_args():
@@ -51,11 +57,12 @@ def get_input_args():
                         default=0.001,
                         help='Learning rate')
 
-    # it has no sense since we are using models from torch
-    # parser.add_argument('--hidden_units',
-    #                     type=int,
-    #                     default=3,
-    #                     help='Hidden units')
+    parser.add_argument('--hidden_units',
+                        metavar='N', 
+                        nargs='+',
+                        type=int,
+                        default=[1920, 1024, 512, 102],
+                        help='Hidden units')
 
     parser.add_argument('--epochs',
                         type=int,
@@ -76,13 +83,13 @@ def get_input_args():
     if args.gpu == False and torch.cuda.is_available() == True:
         print("GPU avaliable. You should use it")
 
-    return args.data_dir, args.save_dir, args.arch, args.learning_rate, args.epochs, args.gpu
+    return args.data_dir, args.save_dir, args.arch, args.learning_rate, args.hidden_units, args.epochs, args.gpu
 
 
 def train(model, trainloader, validationloader, optimizer, criterion, epochs, cuda = False):
     steps = 0 
     running_loss = 0 
-    print_every = 1
+    print_every = 20
     
     if cuda:
         model.cuda()
@@ -111,8 +118,8 @@ def train(model, trainloader, validationloader, optimizer, criterion, epochs, cu
                 test_loss, accuracy = validation(model, validationloader, criterion, cuda)
                 print("Epoch: {}/{}.. ".format(e+1, epochs),
                     "Training Loss: {:.3f}.. ".format(running_loss/print_every),
-                    "Test Loss: {:.3f}.. ".format(test_loss/len(validationloader)),
-                    "Test Accuracy: {:.3f}".format(accuracy/len(validationloader)))
+                    "Validation Loss: {:.3f}.. ".format(test_loss/len(validationloader)),
+                    "Validation Accuracy: {:.3f}".format(accuracy/len(validationloader)))
 
                 running_loss = 0
 
