@@ -7,6 +7,7 @@ from PIL import Image
 import json
 import argparse
 import model_factory
+from torch.autograd import Variable
 
 
 def main():
@@ -21,7 +22,7 @@ def main():
     probs, classes = predict(image_path, model, idx_to_class, top_k, gpu)
 
     for prob, classe in zip(probs, classes):
-        print(prob, classe)
+        print(cat_to_name[classe], prob)
 
 
 def get_input_args():
@@ -49,8 +50,7 @@ def get_input_args():
                         help='Mapping of categories to real names')
 
     parser.add_argument('--gpu',
-                        type=bool,
-                        default=False,
+                        action='store_true',
                         help='Use gpu')
 
     
@@ -70,19 +70,24 @@ def predict(image_path, model, idx_to_class, topk, cuda):
     ''' Predict the class (or classes) of an image using a trained deep learning model.
     '''
     
-    model.eval()
 
     image = Image.open(image_path)
     image = process_image(image)
     image = torch.FloatTensor([image])
     
     if cuda:
+        model.cuda()
         image = image.cuda()
     
+    model.eval()
+
     output = model.forward(Variable(image))
     
     # top predictions
-    all_probs = torch.exp(output).data.numpy()[0]
+    if cuda:
+        all_probs = torch.exp(output).data.cpu().numpy()[0]
+    else:
+        all_probs = torch.exp(output).data.numpy()[0]
     topk_index = np.argsort(all_probs)[-topk:][::-1] 
     topk_class = [idx_to_class[x] for x in topk_index]
     topk_prob = all_probs[topk_index]

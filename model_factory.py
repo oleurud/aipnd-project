@@ -23,21 +23,19 @@ def get_model(arch):
 
     model.classifier = classifier
     
-    model.arch = arch
-
     return model
 
-def save_trained_model(model, class_to_idx, filename):
+def save_trained_model(model, arch, class_to_idx, filename):
     checkpoint = {
         'state_dict': model.state_dict(),
         'class_to_idx': class_to_idx,
-        'arch': model.arch
+        'arch': arch
     }
     torch.save(checkpoint, filename)
 
 def load_trained_model(filename):
-    checkpoint = torch.load()
-    model = get_model(checkpoint.arch)
+    checkpoint = torch.load(filename)
+    model = get_model(checkpoint['arch'])
     model.load_state_dict(checkpoint['state_dict'])
     model.class_to_idx = checkpoint['class_to_idx']
     

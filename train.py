@@ -24,7 +24,7 @@ def main():
 
     train(model, trainloader, validationloader, optimizer, criterion, epochs, gpu)
 
-    model_factory.save_trained_model(model, load_data.get_train_class_to_idx(data_dir), save_dir)
+    model_factory.save_trained_model(model, arch, load_data.get_train_class_to_idx(data_dir), save_dir)
 
 
 def get_input_args():
@@ -63,8 +63,7 @@ def get_input_args():
                         help='Epochs')
 
     parser.add_argument('--gpu',
-                        type=bool,
-                        default=False,
+                        action='store_true',
                         help='Use gpu')
                     
 
@@ -106,7 +105,7 @@ def train(model, trainloader, validationloader, optimizer, criterion, epochs, cu
             loss = criterion(output, labels)
             loss.backward()
             optimizer.step()
-            running_loss += loss.item()
+            running_loss += loss.data[0]
 
             if steps % print_every == 0:
                 test_loss, accuracy = validation(model, validationloader, criterion, cuda)
@@ -132,7 +131,7 @@ def validation(model, validationloader, criterion, cuda):
 
 
         output = model.forward(inputs)
-        test_loss += criterion(output, labels).item()
+        test_loss += criterion(output, labels).data[0]
 
         ## Calculating the accuracy 
         # Model's output is log-softmax, take exponential to get the probabilities
