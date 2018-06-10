@@ -62,7 +62,7 @@ def get_input_args():
                         metavar='N', 
                         nargs='+',
                         type=int,
-                        default=[1920, 1024, 512, 102],
+                        default=[1024, 512],
                         help='Hidden units')
 
     parser.add_argument('--epochs',
