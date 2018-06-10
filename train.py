@@ -26,6 +26,7 @@ def main():
     model_factory.save_trained_model(
         model, 
         arch, 
+        optimizer,
         load_data.get_train_class_to_idx(data_dir), 
         hidden_units,
         epochs,

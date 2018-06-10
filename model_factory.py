@@ -33,11 +33,12 @@ def _create_classifier(hidden_units):
     return nn.Sequential(OrderedDict(classifier_layers))
 
 
-def save_trained_model(model, arch, class_to_idx, hidden_units, epochs, learning_rate, filename):
+def save_trained_model(model, arch, optimizer, class_to_idx, hidden_units, epochs, learning_rate, filename):
     checkpoint = {
         'state_dict': model.state_dict(),
         'class_to_idx': class_to_idx,
         'arch': arch,
+        'optimizer': optimizer,
         'hidden_units': hidden_units,
         'epochs': epochs,
         'learning_rate': learning_rate
