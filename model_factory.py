@@ -11,7 +11,10 @@ def get_model(arch, hidden_units):
     for param in model.parameters():
         param.requires_grad = False
     
-    input_features = model.classifier.in_features
+    input_features = 1920
+    if(arch[:3] == 'vgg'):
+        input_features = 25088
+
     hidden_units = [input_features] + hidden_units + [102]
     
     model.classifier = _create_classifier(hidden_units)

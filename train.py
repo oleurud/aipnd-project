@@ -35,13 +35,29 @@ def main():
 
 
 def get_input_args():
+
+    available_models = [
+        'densenet201',
+        'densenet161',
+        'densenet169',
+        'densenet121',
+        'vgg19_bn',
+        'vgg19',
+        'vgg16_bn',
+        'vgg16',
+        'vgg13_bn',
+        'vgg13',
+        'vgg11_bn',
+        'vgg11'
+    ]
+
     parser = argparse.ArgumentParser(description='description')
 
     parser.add_argument('data_dir',
                         metavar='data_dir',
                         type=str,
                         default='./flowers/',
-                        help='Path to save checkpoints')
+                        help='Test, training and validation files path')
 
     parser.add_argument('--save_dir',
                         type=str,
@@ -51,6 +67,7 @@ def get_input_args():
     parser.add_argument('--arch',
                         type=str,
                         default='densenet201',
+                        choices=available_models,
                         help='Architecture')
 
     parser.add_argument('--learning_rate',
@@ -63,7 +80,7 @@ def get_input_args():
                         nargs='+',
                         type=int,
                         default=[1024, 512],
-                        help='Hidden units')
+                        help='Hidden units. Example: --hidden_units 1500 1000 500')
 
     parser.add_argument('--epochs',
                         type=int,
